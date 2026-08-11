@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /projects/{projectId} {
+      // Signed-in owner only. `resource` is the document already stored.
+      allow read, update, delete: if request.auth != null
+                                  && resource.data.userId == request.auth.uid;
+
+      // On create there is no stored doc yet, so check the incoming payload.
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+
+      // An update must not hand the document to someone else.
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Everything else is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

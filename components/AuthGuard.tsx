@@ -6,15 +6,17 @@ import { useEffect } from 'react'
 import FullScreenLoader from '@/components/FullScreenLoader'
 import { useAuthStore } from '@/store/authStore'
 
-export default function Home() {
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const loading = useAuthStore((s) => s.loading)
 
   useEffect(() => {
-    if (loading) return
-    router.replace(user ? '/dashboard' : '/login')
+    if (!loading && !user) router.replace('/login')
   }, [loading, user, router])
 
-  return <FullScreenLoader />
+  // Also covers the frame between the redirect firing and the route changing.
+  if (loading || !user) return <FullScreenLoader />
+
+  return <>{children}</>
 }
