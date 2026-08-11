@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Shield, Star, Zap } from 'lucide-react'
 
@@ -23,8 +23,8 @@ export default function FeaturesBlock({ block, isSelected, onClick }: Props) {
     <section
       onClick={onClick}
       style={{
-        backgroundColor: str(p.bgColor, '#1a1a1f'),
-        color: str(p.textColor, '#e4e4e7'),
+        backgroundColor: str(p.bgColor, '#171312'),
+        color: str(p.textColor, '#f5eeea'),
         ...selectionStyle(isSelected),
       }}
       className="w-full cursor-pointer px-8 py-16"
@@ -40,7 +40,7 @@ export default function FeaturesBlock({ block, isSelected, onClick }: Props) {
               className="rounded-xl p-6 text-center"
               style={{ backgroundColor: 'rgba(127,127,127,0.10)' }}
             >
-              <Icon className="mx-auto h-8 w-8" style={{ color: '#6366f1' }} />
+              <Icon className="mx-auto h-8 w-8" style={{ color: '#f97316' }} />
               <h3 className="mt-4 font-semibold">{feature.title}</h3>
               <p className="mt-2 text-sm opacity-75">{feature.desc}</p>
             </div>

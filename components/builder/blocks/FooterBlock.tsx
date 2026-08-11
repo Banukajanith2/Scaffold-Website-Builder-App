@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { Block } from '@/types'
 
@@ -14,8 +14,8 @@ export default function FooterBlock({ block, isSelected, onClick }: Props) {
     <footer
       onClick={onClick}
       style={{
-        backgroundColor: str(p.bgColor, '#0f0f11'),
-        color: str(p.textColor, '#71717a'),
+        backgroundColor: str(p.bgColor, '#0c0a09'),
+        color: str(p.textColor, '#b3a29c'),
         ...selectionStyle(isSelected),
       }}
       className="w-full cursor-pointer px-8 py-12 text-center"

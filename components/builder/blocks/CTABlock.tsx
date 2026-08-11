@@ -13,7 +13,7 @@ export default function CTABlock({ block, isSelected, onClick }: Props) {
     <section
       onClick={onClick}
       style={{
-        backgroundColor: str(p.bgColor, '#6366f1'),
+        backgroundColor: str(p.bgColor, '#be123c'),
         color: str(p.textColor, '#ffffff'),
         ...selectionStyle(isSelected),
       }}
@@ -25,7 +25,7 @@ export default function CTABlock({ block, isSelected, onClick }: Props) {
         className="mt-8 inline-block rounded-lg px-8 py-3 text-sm font-semibold"
         style={{
           backgroundColor: str(p.buttonBgColor, '#ffffff'),
-          color: str(p.buttonTextColor, '#6366f1'),
+          color: str(p.buttonTextColor, '#be123c'),
         }}
       >
         {str(p.buttonText, 'Get started free')}

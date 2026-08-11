@@ -1,6 +1,6 @@
 'use client'
 
-import { ExternalLink, Plus, Trash2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -8,14 +8,11 @@ import AuthGuard from '@/components/AuthGuard'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import NewProjectDialog from '@/components/NewProjectDialog'
 import EmptyState from '@/components/dashboard/EmptyState'
+import ProjectCard from '@/components/dashboard/ProjectCard'
 import { signOut } from '@/lib/auth'
 import { createProject, deleteProject, getUserProjects } from '@/lib/firestore'
-import { formatRelativeTime } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
 import type { Project } from '@/types'
-
-const CARD_BASE =
-  'rounded-xl border border-builder-border bg-builder-surface transition-colors hover:bg-builder-hover'
 
 function Navbar({ displayName, email }: { displayName: string | null; email: string | null }) {
   const initial = (displayName || email || '?').trim().charAt(0).toUpperCase()
@@ -152,36 +149,13 @@ function DashboardContent() {
               <CardSkeleton />
             </>
           ) : (
-            projects.map((project) => (
-              <div key={project.id} className={`${CARD_BASE} flex h-32 flex-col justify-between p-5`}>
-                <div className="min-w-0">
-                  <h2 className="truncate font-medium text-builder-text">{project.name}</h2>
-                  <p className="mt-1 text-xs text-builder-muted">
-                    Last edited {formatRelativeTime(project.updatedAt)}
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-1">
-                  <button
-                    type="button"
-                    aria-label={`Open ${project.name}`}
-                    title="Open"
-                    onClick={() => router.push(`/builder/${project.id}`)}
-                    className="rounded-lg p-2 text-builder-muted transition-colors hover:bg-builder-bg hover:text-builder-text"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Delete ${project.name}`}
-                    title="Delete"
-                    onClick={() => setPendingDelete(project)}
-                    className="rounded-lg p-2 text-builder-muted transition-colors hover:bg-builder-bg hover:text-builder-danger"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+            projects.map((project, i) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onDelete={setPendingDelete}
+                index={i}
+              />
             ))
           )}
         </div>

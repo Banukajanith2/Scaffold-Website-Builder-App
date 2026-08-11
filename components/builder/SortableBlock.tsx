@@ -28,7 +28,10 @@ export default function SortableBlock({ block }: { block: Block }) {
         transition,
         opacity: isDragging ? 0.4 : 1,
       }}
-      className="group relative"
+      // Scale-in tells you where the block you just added landed. The canvas
+      // itself never animates once placed, so the user's design never appears
+      // to be rendering incorrectly.
+      className="group relative animate-scale-in"
     >
       {/* Drag handle, hidden until hover so it does not sit over the design. */}
       <button

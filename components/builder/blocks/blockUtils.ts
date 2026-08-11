@@ -14,5 +14,5 @@ export function num(value: unknown, fallback: number): number {
 }
 
 export function selectionStyle(isSelected: boolean): CSSProperties {
-  return isSelected ? { outline: '2px solid #6366f1', outlineOffset: '-2px' } : {}
+  return isSelected ? { outline: '2px solid #f97316', outlineOffset: '-2px' } : {}
 }

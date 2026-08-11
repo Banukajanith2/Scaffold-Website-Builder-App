@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { Block } from '@/types'
 
@@ -13,8 +13,8 @@ export default function TestimonialBlock({ block, isSelected, onClick }: Props) 
     <section
       onClick={onClick}
       style={{
-        backgroundColor: str(p.bgColor, '#1a1a1f'),
-        color: str(p.textColor, '#e4e4e7'),
+        backgroundColor: str(p.bgColor, '#171312'),
+        color: str(p.textColor, '#f5eeea'),
         ...selectionStyle(isSelected),
       }}
       className="w-full cursor-pointer px-8 py-16"
@@ -23,7 +23,7 @@ export default function TestimonialBlock({ block, isSelected, onClick }: Props) 
         <div
           aria-hidden="true"
           className="font-serif leading-none"
-          style={{ fontSize: 72, color: '#6366f1', lineHeight: 0.8 }}
+          style={{ fontSize: 72, color: '#f97316', lineHeight: 0.8 }}
         >
           &ldquo;
         </div>

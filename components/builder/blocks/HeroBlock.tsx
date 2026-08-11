@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { Block } from '@/types'
 
@@ -13,7 +13,7 @@ export default function HeroBlock({ block, isSelected, onClick }: Props) {
     <section
       onClick={onClick}
       style={{
-        backgroundColor: str(p.bgColor, '#0f0f11'),
+        backgroundColor: str(p.bgColor, '#0c0a09'),
         color: str(p.textColor, '#ffffff'),
         minHeight: 400,
         ...selectionStyle(isSelected),
@@ -28,7 +28,7 @@ export default function HeroBlock({ block, isSelected, onClick }: Props) {
       </p>
       <span
         className="mt-8 inline-block rounded-lg px-6 py-3 text-sm font-medium"
-        style={{ backgroundColor: '#6366f1', color: '#ffffff' }}
+        style={{ backgroundColor: '#c2410c', color: '#ffffff' }}
       >
         {str(p.ctaText, 'Get started')}
       </span>

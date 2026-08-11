@@ -35,7 +35,7 @@ export default function Toast({ toast, onDismiss, duration = 2000 }: Props) {
           role="status"
           aria-live="polite"
           className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-lg ${
-            toast.variant === 'success' ? 'bg-emerald-600' : 'bg-builder-danger'
+            toast.variant === 'success' ? 'bg-emerald-700' : 'bg-builder-danger-fill'
           }`}
         >
           {toast.variant === 'success' ? (

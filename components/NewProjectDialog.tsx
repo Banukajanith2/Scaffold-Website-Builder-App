@@ -75,7 +75,7 @@ export default function NewProjectDialog({ open, onOpenChange, onConfirm }: Prop
               <button
                 type="submit"
                 disabled={busy}
-                className="flex items-center gap-2 rounded-lg bg-builder-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-builder-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex items-center gap-2 rounded-lg bg-builder-accent px-4 py-2 text-sm font-semibold text-builder-accent-ink transition-colors hover:bg-builder-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busy && <LoaderCircle className="h-4 w-4 animate-spin" />}
                 Create

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { CSSProperties } from 'react'
 
@@ -19,8 +19,8 @@ export default function TextBlock({ block, isSelected, onClick }: Props) {
     <section
       onClick={onClick}
       style={{
-        backgroundColor: str(p.bgColor, '#0f0f11'),
-        color: str(p.textColor, '#e4e4e7'),
+        backgroundColor: str(p.bgColor, '#0c0a09'),
+        color: str(p.textColor, '#f5eeea'),
         ...selectionStyle(isSelected),
       }}
       className="w-full cursor-pointer px-8 py-12"

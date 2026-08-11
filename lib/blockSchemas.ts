@@ -5,7 +5,7 @@ export const heroDefaults = {
   subheadline: 'A modern page builder for everyone.',
   ctaText: 'Get started',
   ctaUrl: '#',
-  bgColor: '#0f0f11',
+  bgColor: '#0c0a09',
   textColor: '#ffffff',
 }
 
@@ -17,41 +17,41 @@ export const featuresDefaults = {
   feature2Desc: 'Easy to use.',
   feature3Title: 'Powerful',
   feature3Desc: 'Endless possibilities.',
-  bgColor: '#1a1a1f',
-  textColor: '#e4e4e7',
+  bgColor: '#171312',
+  textColor: '#f5eeea',
 }
 
 export const testimonialDefaults = {
   quote: 'This product changed how we work.',
   author: 'Jane Smith',
   role: 'CEO, Acme Corp',
-  bgColor: '#1a1a1f',
-  textColor: '#e4e4e7',
+  bgColor: '#171312',
+  textColor: '#f5eeea',
 }
 
 export const textDefaults = {
   content: 'Write something here.',
   fontSize: '16',
   textAlign: 'left',
-  textColor: '#e4e4e7',
-  bgColor: '#0f0f11',
+  textColor: '#f5eeea',
+  bgColor: '#0c0a09',
 }
 
 export const ctaDefaults = {
   headline: 'Ready to start?',
   buttonText: 'Get started free',
   buttonUrl: '#',
-  bgColor: '#6366f1',
+  bgColor: '#be123c',
   textColor: '#ffffff',
   buttonBgColor: '#ffffff',
-  buttonTextColor: '#6366f1',
+  buttonTextColor: '#be123c',
 }
 
 export const footerDefaults = {
   companyName: 'Your Company',
   tagline: 'Building the future.',
-  bgColor: '#0f0f11',
-  textColor: '#71717a',
+  bgColor: '#0c0a09',
+  textColor: '#b3a29c',
 }
 
 export const BLOCK_DEFAULTS: Record<BlockType, Record<string, unknown>> = {

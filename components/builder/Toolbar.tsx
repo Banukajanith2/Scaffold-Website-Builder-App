@@ -274,7 +274,7 @@ export default function Toolbar() {
         <button
           type="button"
           onClick={handleExport}
-          className="flex items-center gap-2 rounded-lg bg-builder-accent px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-builder-accent-hover"
+          className="flex items-center gap-2 rounded-lg bg-builder-accent px-3 py-1.5 text-sm font-semibold text-builder-accent-ink transition-colors hover:bg-builder-accent-hover"
         >
           <Download className="h-4 w-4" />
           Export HTML
