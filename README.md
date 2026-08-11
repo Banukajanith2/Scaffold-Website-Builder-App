@@ -10,12 +10,26 @@ drag-and-drop, an undo/redo history, and safe HTML generation.
 
 ## Live demo
 
-Coming soon, deploying to Vercel.
+**[scaffold-website-builder.vercel.app](https://scaffold-website-builder.vercel.app/)**
+
+Sign in with a Google account to try it. Projects are private to your account.
 
 ## Screenshots
 
-> Add screenshots here: the dashboard, the builder with a block selected, the
-> preview modal, and an exported page.
+### The builder
+
+Three columns: block picker, live canvas, and the property editor for the
+selected block. Edits apply to the canvas as you type, and the toolbar reports
+save state.
+
+![The Scaffold builder, showing the block picker, canvas with a hero and features block, and the property editor](images/builder.png)
+
+### The dashboard
+
+Every project belongs to the signed-in user, enforced by Firestore rules rather
+than by the client.
+
+![The Scaffold dashboard showing the empty state](images/dashboard.png)
 
 ## What it demonstrates
 
