@@ -11,10 +11,52 @@ import Canvas from '@/components/builder/Canvas'
 import PropertyEditor from '@/components/builder/PropertyEditor'
 import Toolbar from '@/components/builder/Toolbar'
 import { getProject } from '@/lib/firestore'
+import {
+  cancelPendingSave,
+  hasBaseline,
+  isDirty,
+  primeBaseline,
+  resetSaveState,
+  scheduleSave,
+  snapshotOf,
+} from '@/lib/save'
 import { useAuthStore } from '@/store/authStore'
 import { useBuilderStore } from '@/store/builderStore'
 
 type LoadState = 'loading' | 'ready' | 'notfound' | 'error'
+
+/**
+ * Debounced persistence for blocks and the project name.
+ *
+ * Both fields share one effect and one timer: they are written by the same
+ * updateProject call, so separate effects would fire two writes whenever a
+ * rename and an edit land in the same window.
+ */
+function useAutoSave(ready: boolean) {
+  const blocks = useBuilderStore((s) => s.blocks)
+  const projectName = useBuilderStore((s) => s.projectName)
+  const projectId = useBuilderStore((s) => s.projectId)
+  const setSaveStatus = useBuilderStore((s) => s.setSaveStatus)
+
+  useEffect(() => {
+    if (!ready || !projectId) return
+
+    const snapshot = snapshotOf(projectName, blocks)
+
+    // First pass after load is the baseline, not an edit worth writing back.
+    if (!hasBaseline()) {
+      primeBaseline(snapshot)
+      return
+    }
+    if (!isDirty(snapshot)) return
+
+    setSaveStatus('unsaved')
+    scheduleSave()
+
+    // Re-running restarts the debounce, which is what makes it a debounce.
+    return cancelPendingSave
+  }, [ready, projectId, blocks, projectName, setSaveStatus])
+}
 
 function BuilderContent({ projectId }: { projectId: string }) {
   const router = useRouter()
@@ -26,10 +68,16 @@ function BuilderContent({ projectId }: { projectId: string }) {
 
   const userId = user?.uid
 
+  useAutoSave(state === 'ready')
+
+  // Drop the previous project's timer and baseline when leaving the builder.
+  useEffect(() => resetSaveState, [projectId])
+
   useEffect(() => {
     if (!userId) return
     let cancelled = false
 
+    resetSaveState()
     setState('loading')
     getProject(projectId)
       .then((project) => {

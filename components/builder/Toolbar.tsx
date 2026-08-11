@@ -1,19 +1,26 @@
 'use client'
 
-import { ArrowLeft, Download, Eye, Redo2, Undo2 } from 'lucide-react'
-import Link from 'next/link'
+import {
+  ArrowLeft,
+  Check,
+  CircleQuestionMark,
+  Download,
+  Eye,
+  LoaderCircle,
+  Redo2,
+  RotateCw,
+  Undo2,
+  X,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-import { exportHtml } from '@/lib/exportHtml'
-import { updateProject } from '@/lib/firestore'
+import PreviewModal from '@/components/builder/PreviewModal'
+import ShortcutsModal from '@/components/builder/ShortcutsModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
+import { generateHTML } from '@/lib/export'
+import { saveNow } from '@/lib/save'
 import { useBuilderStore } from '@/store/builderStore'
-
-const STATUS_LABEL: Record<string, string> = {
-  saved: 'Saved',
-  saving: 'Saving...',
-  unsaved: 'Unsaved changes',
-  error: 'Save failed',
-}
 
 /** True when the event came from a field where the user is typing. */
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -23,60 +30,128 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable
 }
 
+function SaveStatus({ onRetry }: { onRetry: () => void }) {
+  const saveStatus = useBuilderStore((s) => s.saveStatus)
+
+  if (saveStatus === 'saving') {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-builder-muted">
+        <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+        Saving...
+      </span>
+    )
+  }
+
+  if (saveStatus === 'unsaved') {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-builder-muted">
+        <span className="h-2 w-2 rounded-full bg-amber-400" />
+        Unsaved changes
+      </span>
+    )
+  }
+
+  if (saveStatus === 'error') {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-builder-danger">
+        <X className="h-3.5 w-3.5" />
+        Save failed
+        <button
+          type="button"
+          onClick={onRetry}
+          className="ml-1 flex items-center gap-1 rounded-md border border-builder-danger/40 px-1.5 py-0.5 text-builder-danger transition-colors hover:bg-builder-danger/10"
+        >
+          <RotateCw className="h-3 w-3" />
+          Retry
+        </button>
+      </span>
+    )
+  }
+
+  return (
+    <span className="flex items-center gap-1.5 text-xs text-emerald-500">
+      <Check className="h-3.5 w-3.5" />
+      Saved
+    </span>
+  )
+}
+
 export default function Toolbar() {
+  const router = useRouter()
+
   const blocks = useBuilderStore((s) => s.blocks)
   const past = useBuilderStore((s) => s.past)
   const future = useBuilderStore((s) => s.future)
   const undo = useBuilderStore((s) => s.undo)
   const redo = useBuilderStore((s) => s.redo)
-  const projectId = useBuilderStore((s) => s.projectId)
   const projectName = useBuilderStore((s) => s.projectName)
   const setProjectName = useBuilderStore((s) => s.setProjectName)
-  const saveStatus = useBuilderStore((s) => s.saveStatus)
 
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(projectName)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [toast, setToast] = useState<ToastState>(null)
 
-  const save = useCallback(async () => {
-    // Read fresh state so a shortcut fired mid-edit never saves a stale snapshot.
-    const s = useBuilderStore.getState()
-    if (!s.projectId) return
-
-    s.setSaveStatus('saving')
-    try {
-      await updateProject(s.projectId, { name: s.projectName, blocks: s.blocks })
-      useBuilderStore.getState().setSaveStatus('saved')
-    } catch {
-      useBuilderStore.getState().setSaveStatus('error')
-    }
+  const manualSave = useCallback(async () => {
+    const ok = await saveNow()
+    setToast(
+      ok
+        ? { message: 'Saved', variant: 'success' }
+        : { message: 'Could not save', variant: 'error' },
+    )
   }, [])
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (!e.ctrlKey && !e.metaKey) return
-      const key = e.key.toLowerCase()
+      const typing = isTypingTarget(e.target)
 
-      if (key === 's') {
-        e.preventDefault()
-        void save()
+      if (e.ctrlKey || e.metaKey) {
+        const key = e.key.toLowerCase()
+
+        if (key === 's') {
+          e.preventDefault()
+          void manualSave()
+          return
+        }
+        // Undo/redo would otherwise fight the browser's own text undo.
+        if (typing) return
+
+        if (key === 'z' && !e.shiftKey) {
+          e.preventDefault()
+          undo()
+        } else if (key === 'y' || (key === 'z' && e.shiftKey)) {
+          e.preventDefault()
+          redo()
+        }
         return
       }
 
-      // Undo/redo would otherwise fight the browser's own text undo.
-      if (isTypingTarget(e.target)) return
+      if (typing) return
 
-      if (key === 'z' && !e.shiftKey) {
+      if (e.key === 'Escape') {
+        useBuilderStore.getState().selectBlock(null)
+        return
+      }
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const selectedId = useBuilderStore.getState().selectedId
+        if (selectedId) {
+          e.preventDefault()
+          useBuilderStore.getState().removeBlock(selectedId)
+        }
+        return
+      }
+
+      if (e.key === '?') {
         e.preventDefault()
-        undo()
-      } else if (key === 'y' || (key === 'z' && e.shiftKey)) {
-        e.preventDefault()
-        redo()
+        setShortcutsOpen(true)
       }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [undo, redo, save])
+  }, [undo, redo, manualSave])
 
   function commitName() {
     setEditingName(false)
@@ -85,23 +160,24 @@ export default function Toolbar() {
     else setDraftName(projectName)
   }
 
-  function handlePreview() {
-    const html = exportHtml(blocks, projectName)
-    const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
-    window.open(url, '_blank', 'noopener,noreferrer')
-    // Give the new tab time to load before dropping the object URL.
-    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  async function handleBack() {
+    // Flush any queued edit, otherwise navigating mid-debounce drops it.
+    if (useBuilderStore.getState().saveStatus !== 'saved') await saveNow()
+    router.push('/dashboard')
+    router.refresh()
   }
 
   function handleExport() {
-    const html = exportHtml(blocks, projectName)
+    const html = generateHTML(blocks, projectName)
     const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
+
     const a = document.createElement('a')
     a.href = url
-    a.download = `${(projectName || 'page').replace(/[^a-z0-9-_]+/gi, '-').toLowerCase()}.html`
+    a.download = `${(projectName || 'page').replace(/\s+/g, '-').toLowerCase()}.html`
     document.body.appendChild(a)
     a.click()
     a.remove()
+
     URL.revokeObjectURL(url)
   }
 
@@ -111,13 +187,14 @@ export default function Toolbar() {
   return (
     <header className="flex shrink-0 items-center justify-between gap-4 border-b border-builder-border bg-builder-surface px-4 py-2.5">
       <div className="flex min-w-0 items-center gap-3">
-        <Link
-          href="/dashboard"
+        <button
+          type="button"
+          onClick={handleBack}
           aria-label="Back to dashboard"
-          className="rounded-lg border border-builder-border p-2 text-builder-muted transition-colors hover:bg-builder-hover hover:text-builder-text"
+          className={iconButton}
         >
           <ArrowLeft className="h-4 w-4" />
-        </Link>
+        </button>
 
         {editingName ? (
           <input
@@ -173,16 +250,21 @@ export default function Toolbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <span
-          className={`text-xs ${saveStatus === 'error' ? 'text-builder-danger' : 'text-builder-muted'}`}
-        >
-          {STATUS_LABEL[saveStatus]}
-        </span>
+        <SaveStatus onRetry={() => void manualSave()} />
 
         <button
           type="button"
-          onClick={handlePreview}
-          disabled={!projectId}
+          onClick={() => setShortcutsOpen(true)}
+          title="Keyboard shortcuts (?)"
+          aria-label="Keyboard shortcuts"
+          className={iconButton}
+        >
+          <CircleQuestionMark className="h-4 w-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
           className="flex items-center gap-2 rounded-lg border border-builder-border px-3 py-1.5 text-sm text-builder-muted transition-colors hover:bg-builder-hover hover:text-builder-text"
         >
           <Eye className="h-4 w-4" />
@@ -198,6 +280,15 @@ export default function Toolbar() {
           Export HTML
         </button>
       </div>
+
+      <PreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        blocks={blocks}
+        pageName={projectName}
+      />
+      <ShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </header>
   )
 }

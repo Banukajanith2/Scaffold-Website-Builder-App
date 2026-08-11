@@ -11,6 +11,22 @@ function pushPast(past: Block[][], current: Block[]): Block[][] {
   return [...next, current]
 }
 
+/**
+ * Property-editor fields fire on every keystroke. Without coalescing, typing a
+ * sentence would push a history entry per character and evict the real undo
+ * steps past HISTORY_LIMIT. Consecutive edits to the same field within this
+ * window share one entry, so undo steps back a whole edit rather than a letter.
+ */
+const COALESCE_MS = 700
+let lastEditSig: string | null = null
+let lastEditAt = 0
+
+/** Forces the next prop edit to start a fresh history entry. */
+function breakCoalesce(): void {
+  lastEditSig = null
+  lastEditAt = 0
+}
+
 function newId(): string {
   // randomUUID needs a secure context; localhost counts, but fall back anyway
   // so a plain-http preview deploy cannot crash block creation.
@@ -55,15 +71,19 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   saveStatus: 'saved',
 
   setBlocks: (blocks) =>
-    set((s) => ({
-      past: pushPast(s.past, s.blocks),
-      future: [],
-      blocks,
-      saveStatus: 'unsaved',
-    })),
+    set((s) => {
+      breakCoalesce()
+      return {
+        past: pushPast(s.past, s.blocks),
+        future: [],
+        blocks,
+        saveStatus: 'unsaved',
+      }
+    }),
 
   addBlock: (type, insertAfterIndex) =>
     set((s) => {
+      breakCoalesce()
       const block: Block = {
         id: newId(),
         type,
@@ -84,24 +104,38 @@ export const useBuilderStore = create<BuilderState>((set) => ({
     }),
 
   updateBlockProps: (id, props) =>
-    set((s) => ({
-      past: pushPast(s.past, s.blocks),
-      future: [],
-      blocks: s.blocks.map((b) => (b.id === id ? { ...b, props: { ...b.props, ...props } } : b)),
-      saveStatus: 'unsaved',
-    })),
+    set((s) => {
+      const sig = `${id}:${Object.keys(props).sort().join(',')}`
+      const now = Date.now()
+      const coalesce = sig === lastEditSig && now - lastEditAt < COALESCE_MS
+      lastEditSig = sig
+      lastEditAt = now
+
+      return {
+        // When coalescing, the burst's first edit already snapshotted and
+        // cleared future, so leave both alone.
+        past: coalesce ? s.past : pushPast(s.past, s.blocks),
+        future: coalesce ? s.future : [],
+        blocks: s.blocks.map((b) => (b.id === id ? { ...b, props: { ...b.props, ...props } } : b)),
+        saveStatus: 'unsaved',
+      }
+    }),
 
   removeBlock: (id) =>
-    set((s) => ({
-      past: pushPast(s.past, s.blocks),
-      future: [],
-      blocks: s.blocks.filter((b) => b.id !== id),
-      selectedId: s.selectedId === id ? null : s.selectedId,
-      saveStatus: 'unsaved',
-    })),
+    set((s) => {
+      breakCoalesce()
+      return {
+        past: pushPast(s.past, s.blocks),
+        future: [],
+        blocks: s.blocks.filter((b) => b.id !== id),
+        selectedId: s.selectedId === id ? null : s.selectedId,
+        saveStatus: 'unsaved',
+      }
+    }),
 
   moveBlock: (fromIndex, toIndex) =>
     set((s) => {
+      breakCoalesce()
       if (
         fromIndex === toIndex ||
         fromIndex < 0 ||
@@ -127,6 +161,7 @@ export const useBuilderStore = create<BuilderState>((set) => ({
 
   duplicateBlock: (id) =>
     set((s) => {
+      breakCoalesce()
       const index = s.blocks.findIndex((b) => b.id === id)
       if (index === -1) return s
 
@@ -145,6 +180,7 @@ export const useBuilderStore = create<BuilderState>((set) => ({
 
   undo: () =>
     set((s) => {
+      breakCoalesce()
       if (s.past.length === 0) return s
       const previous = s.past[s.past.length - 1]
 
@@ -160,6 +196,7 @@ export const useBuilderStore = create<BuilderState>((set) => ({
 
   redo: () =>
     set((s) => {
+      breakCoalesce()
       if (s.future.length === 0) return s
       const next = s.future[0]
 
@@ -172,7 +209,8 @@ export const useBuilderStore = create<BuilderState>((set) => ({
       }
     }),
 
-  loadProject: (project) =>
+  loadProject: (project) => {
+    breakCoalesce()
     set({
       blocks: project.blocks ?? [],
       past: [],
@@ -181,7 +219,8 @@ export const useBuilderStore = create<BuilderState>((set) => ({
       projectId: project.id,
       projectName: project.name,
       saveStatus: 'saved',
-    }),
+    })
+  },
 
   setProjectName: (name) => set({ projectName: name, saveStatus: 'unsaved' }),
 

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import NewProjectDialog from '@/components/NewProjectDialog'
+import EmptyState from '@/components/dashboard/EmptyState'
 import { signOut } from '@/lib/auth'
 import { createProject, deleteProject, getUserProjects } from '@/lib/firestore'
 import { formatRelativeTime } from '@/lib/utils'
@@ -132,6 +133,9 @@ function DashboardContent() {
           </div>
         )}
 
+        {!loadingProjects && projects.length === 0 ? (
+          <EmptyState onCreate={() => setDialogOpen(true)} />
+        ) : (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <button
             type="button"
@@ -181,6 +185,7 @@ function DashboardContent() {
             ))
           )}
         </div>
+        )}
       </main>
 
       <NewProjectDialog
