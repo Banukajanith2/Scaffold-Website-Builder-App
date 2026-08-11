@@ -4,6 +4,7 @@ import { Eye, EyeOff, LoaderCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import Logo from '@/components/Logo'
 import AssemblyPanel from '@/components/login/AssemblyPanel'
 import {
   authErrorMessage,
@@ -124,7 +125,7 @@ export default function LoginPage() {
     <main className="grid min-h-screen bg-builder-surface lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex items-center justify-center px-6 py-14 sm:px-12">
         <div className="w-full max-w-sm animate-fade-up">
-          <span className="inline-block h-8 w-8 rounded-lg bg-gradient-to-br from-builder-grad-from via-builder-grad-via to-builder-grad-to" />
+          <Logo size={44} priority />
 
           <h1 className="mt-6 text-[1.75rem] font-semibold leading-tight tracking-tight text-white">
             Welcome to Scaffold

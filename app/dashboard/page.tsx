@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import AuthGuard from '@/components/AuthGuard'
+import Logo from '@/components/Logo'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import NewProjectDialog from '@/components/NewProjectDialog'
 import EmptyState from '@/components/dashboard/EmptyState'
@@ -20,7 +21,10 @@ function Navbar({ displayName, email }: { displayName: string | null; email: str
   return (
     <header className="border-b border-builder-border">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <span className="text-lg font-semibold text-white">Scaffold</span>
+        <div className="flex items-center gap-2.5">
+          <Logo size={28} priority />
+          <span className="text-lg font-semibold tracking-tight text-white">Scaffold</span>
+        </div>
 
         <div className="flex items-center gap-3">
           <div
