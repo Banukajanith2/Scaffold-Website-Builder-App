@@ -267,6 +267,10 @@ export default function LoginPage() {
               {isSignup ? 'Sign in' : 'Create one'}
             </button>
           </p>
+
+          <p className="mt-8 text-center text-xs text-builder-muted/75">
+            Built by Banuka Janith
+          </p>
         </div>
       </div>
 
